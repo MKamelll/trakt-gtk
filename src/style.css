@@ -7,3 +7,15 @@
     margin: 8px;
     padding: 8px;
 }
+
+.show-details-widget {
+    padding: 8px;
+}
+
+.show-details-widget frame {
+    padding: 8px;
+}
+
+.show-details-widget-overview {
+    font-size: 18pt;
+}
