@@ -40,8 +40,8 @@ fn build_ui(app: &Application) {
     let window = ApplicationWindow::builder()
         .application(app)
         .title("trakt")
-        .default_height(460)
-        .default_width(640)
+        .default_height(640)
+        .default_width(860)
         .build();
 
     let trakt_client = Rc::new(RefCell::new(TraktClient::new()));

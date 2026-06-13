@@ -15,34 +15,35 @@ impl SearchResultWidget {
     pub fn new(result: &SearchResult) -> Box {
         let vbox = Box::new(Orientation::Vertical, 4);
         vbox.set_hexpand(true);
-
         let show = &result.show;
 
-        let title_box = Box::new(Orientation::Horizontal, 0);
-        title_box.set_hexpand(true);
+        let title_box = Box::new(Orientation::Horizontal, 12);
         let title_label = Label::new(Some(&show.title));
-        title_label.set_hexpand(true);
         title_label.set_halign(Align::Start);
         let year = match show.year {
             Some(y) => y.to_string(),
             None => "N/A".to_string(),
         };
 
-        let year_label = Label::new(Some(&format!("Year: {}", year)));
+        let year_label = Label::new(Some(&year));
         year_label.set_halign(Align::End);
         let overview = match &show.overview {
             Some(o) => o,
             None => &"N/A".to_string(),
         };
 
+        year_label.add_css_class("dim-label");
+
         title_box.append(&title_label);
         title_box.append(&year_label);
 
         let overview_label = Label::new(Some(&format!("Overview: {}", overview)));
-        overview_label.set_hexpand(true);
         overview_label.set_halign(Align::Start);
         overview_label.set_wrap(true);
-        overview_label.set_lines(4);
+        overview_label.set_max_width_chars(20);
+        overview_label.set_lines(2);
+        overview_label.set_ellipsize(gtk4::pango::EllipsizeMode::End);
+        overview_label.add_css_class("dim-label");
 
         vbox.append(&title_box);
         vbox.append(&overview_label);
@@ -65,7 +66,6 @@ impl SearchWidget {
         let scrolled_window = ScrolledWindow::new();
         let list_box = ListBox::new();
         let overlay = Overlay::new();
-        list_box.set_hexpand(true);
         scrolled_window.set_vexpand(true);
         list_box.add_css_class("search-results-listbox");
         scrolled_window.set_hscrollbar_policy(gtk4::PolicyType::Never);
@@ -109,6 +109,9 @@ impl SearchWidget {
                             spinner.start();
                             spinner.set_visible(true);
                             let res = t2.borrow().search(entry.text().to_string()).await;
+                            while let Some(c) = list_box.last_child() {
+                                list_box.remove(&c);
+                            }
                             spinner.stop();
                             spinner.set_visible(false);
                             for r in res {
