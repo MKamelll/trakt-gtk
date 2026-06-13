@@ -1,3 +1,9 @@
 .search-widget {
-    padding: 4px;
+    padding: 8px;
+}
+
+.search-result-widget {
+    background: alpha(currentColor, 0.1);
+    margin: 8px;
+    padding: 8px;
 }

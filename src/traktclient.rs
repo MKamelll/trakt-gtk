@@ -1,8 +1,10 @@
+use chrono::Utc;
 use gtk4::{
     glib::{KeyFile, KeyFileFlags},
     show_uri,
 };
 use reqwest::Url;
+use serde::de::DeserializeOwned;
 use tiny_http::{Response, Server};
 
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -11,6 +13,37 @@ struct TokenResponse {
     refresh_token: String,
     expires_in: i64,
     created_at: i64,
+}
+
+#[derive(serde::Deserialize, serde::Serialize, Clone, Debug)]
+pub struct Ids {
+    trakt: i64,
+    slug: String,
+    tvdb: Option<i64>,
+    imdb: Option<String>,
+    tmdb: Option<i64>,
+}
+
+#[derive(serde::Deserialize, serde::Serialize, Clone, Debug)]
+pub struct Show {
+    pub title: String,
+    pub year: Option<i64>,
+    pub ids: Ids,
+    pub tagline: Option<String>,
+    pub overview: Option<String>,
+    pub first_aired: Option<chrono::DateTime<Utc>>,
+    pub runtime: Option<i64>,
+    pub network: Option<String>,
+    pub country: Option<String>,
+    pub rating: Option<f32>,
+    pub languages: Option<Vec<String>>,
+    pub genres: Option<Vec<String>>,
+    pub original_title: Option<String>,
+}
+
+#[derive(serde::Deserialize, serde::Serialize, Clone, Debug)]
+pub struct SearchResult {
+    pub show: Show,
 }
 
 #[derive(Clone, Debug)]
@@ -182,5 +215,59 @@ impl TraktClient {
             Some(_) => true,
             None => false,
         }
+    }
+
+    async fn get<T: DeserializeOwned>(
+        &self,
+        endpoint: &str,
+        auth: bool,
+        params: Vec<(&str, &str)>,
+    ) -> T {
+        let url = Url::parse_with_params(&format!("{}{}", self.base_uri, endpoint), params)
+            .expect(&format!(
+                "couldn't create the url for the endpoint {}",
+                endpoint
+            ))
+            .to_string();
+
+        let mut builder = self
+            .client
+            .get(&url)
+            .header("Content-Type", "application/json")
+            .header("User-Agent", "tracktor/1.0")
+            .header("trakt-api-key", &self.client_id)
+            .header("trakt-api-version", "2");
+
+        if auth {
+            builder = builder
+                .try_clone()
+                .expect("couldn't clone the builder")
+                .header(
+                    "Authorization",
+                    &format!(
+                        "Bearer {}",
+                        self.access_token
+                            .clone()
+                            .expect("trying to make an auth request without a token")
+                    ),
+                );
+        }
+
+        builder
+            .send()
+            .await
+            .expect("failed to send the get request")
+            .json::<T>()
+            .await
+            .expect("couldn't parse the get request response")
+    }
+
+    pub async fn search(&self, show_name: String) -> Vec<SearchResult> {
+        self.get(
+            "/search/show",
+            false,
+            vec![("query", &show_name), ("extended", "full")],
+        )
+        .await
     }
 }
