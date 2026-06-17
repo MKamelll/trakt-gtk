@@ -12,8 +12,11 @@ use searchwidget::SearchWidget;
 use traktclient::TraktClient;
 
 mod loginwidget;
+mod searchresultwidget;
 mod searchwidget;
+mod seasonswidget;
 mod showdetailswidget;
+mod showinfoWidget;
 mod traktclient;
 
 #[tokio::main]
