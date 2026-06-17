@@ -3,7 +3,11 @@ use gtk4::{
     prelude::{BoxExt, ButtonExt, FrameExt, GridExt, WidgetExt},
 };
 
-use crate::{seasonswidget::SeasonsWidget, showinfoWidget::ShowInfoWidget, traktclient::Show};
+use crate::{
+    seasonswidget::SeasonsWidget,
+    showinfoWidget::ShowInfoWidget,
+    traktclient::{Season, Show},
+};
 
 #[derive(Clone)]
 pub struct ShowDetailsWidget {
@@ -37,8 +41,9 @@ impl ShowDetailsWidget {
         self.back_btn.connect_clicked(move |_| f());
     }
 
-    pub fn update(&self, show: &Show) {
+    pub fn update(&self, show: &Show, seasons: &Vec<Season>) {
         self.info_widget.update(show);
+        self.seasons_widget.update(seasons);
     }
 
     pub fn root(&self) -> &Notebook {

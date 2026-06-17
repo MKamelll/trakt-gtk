@@ -6,6 +6,7 @@ use gtk4::{
 use reqwest::Url;
 use serde::de::DeserializeOwned;
 use tiny_http::{Response, Server};
+use tokio::runtime::Id;
 
 #[derive(serde::Deserialize, serde::Serialize)]
 struct TokenResponse {
@@ -18,7 +19,7 @@ struct TokenResponse {
 #[derive(serde::Deserialize, serde::Serialize, Clone, Debug)]
 pub struct Ids {
     trakt: i64,
-    slug: String,
+    slug: Option<String>,
     tvdb: Option<i64>,
     imdb: Option<String>,
     tmdb: Option<i64>,
@@ -38,6 +39,19 @@ pub struct Show {
     pub rating: Option<f32>,
     pub languages: Option<Vec<String>>,
     pub genres: Option<Vec<String>>,
+    pub original_title: Option<String>,
+}
+
+#[derive(serde::Deserialize, serde::Serialize, Clone, Debug)]
+pub struct Season {
+    pub number: i64,
+    pub ids: Ids,
+    pub rating: Option<f32>,
+    pub episode_count: Option<i64>,
+    pub title: Option<String>,
+    pub overview: Option<String>,
+    pub first_aired: Option<chrono::DateTime<Utc>>,
+    pub network: Option<String>,
     pub original_title: Option<String>,
 }
 
@@ -267,6 +281,15 @@ impl TraktClient {
             "/search/show",
             false,
             vec![("query", &show_name), ("extended", "full")],
+        )
+        .await
+    }
+
+    pub async fn get_show_seasons(&self, show: &Show) -> Vec<Season> {
+        self.get(
+            &format!("/shows/{}/seasons", show.ids.trakt),
+            false,
+            vec![("extended", "full")],
         )
         .await
     }

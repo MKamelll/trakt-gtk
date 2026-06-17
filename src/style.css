@@ -19,3 +19,11 @@
 .show-details-widget-overview {
     font-size: 18pt;
 }
+
+.seasons-widget-sidebar {
+    padding: 8px;
+}
+
+.seasons-widget-maincontent {
+    padding: 8px;
+}

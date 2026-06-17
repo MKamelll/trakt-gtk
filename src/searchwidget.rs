@@ -12,7 +12,7 @@ use crate::{
     searchresultwidget::SearchResultWidget,
     showdetailswidget::ShowDetailsWidget,
     showinfoWidget::ShowInfoWidget,
-    traktclient::{SearchResult, Show, TraktClient},
+    traktclient::{SearchResult, Season, Show, TraktClient},
 };
 
 pub struct SearchWidget {
@@ -100,6 +100,7 @@ impl SearchWidget {
             }
         ));
 
+        let t2 = Rc::clone(&trakt_client);
         let r2 = Rc::clone(&results);
         list_box.connect_row_activated(glib::clone!(
             #[weak]
@@ -107,9 +108,23 @@ impl SearchWidget {
             #[strong]
             show_widget,
             move |_, row| {
-                let show = &r2.borrow()[row.index() as usize].show;
-                show_widget.update(show);
-                stack.set_visible_child_name("show");
+                let r3 = Rc::clone(&r2);
+                let t3 = Rc::clone(&t2);
+                MainContext::default().spawn_local(glib::clone!(
+                    #[weak]
+                    stack,
+                    #[weak]
+                    row,
+                    #[strong]
+                    show_widget,
+                    async move {
+                        let show = &r3.borrow()[row.index() as usize].show;
+                        let t = t3.borrow();
+                        let res = &t.get_show_seasons(show).await;
+                        show_widget.update(show, res);
+                        stack.set_visible_child_name("show");
+                    }
+                ));
             }
         ));
 
