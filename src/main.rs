@@ -4,7 +4,7 @@ use gtk4::{
     Application, ApplicationWindow, CssProvider, STYLE_PROVIDER_PRIORITY_APPLICATION,
     gio::prelude::{ApplicationExt, ApplicationExtManual},
     glib::ExitCode,
-    prelude::GtkWindowExt,
+    prelude::{GtkWindowExt, WidgetExt},
     style_context_add_provider_for_display,
 };
 use loginwidget::LoginWidget;
@@ -13,6 +13,7 @@ use traktclient::TraktClient;
 
 mod loginwidget;
 mod searchwidget;
+mod showdetailswidget;
 mod traktclient;
 
 #[tokio::main]
@@ -53,9 +54,9 @@ fn build_ui(app: &Application) {
     let search = SearchWidget::new(t2);
 
     if trakt_client.borrow().is_logged_in() {
-        window.set_child(Some(&search))
+        window.set_child(Some(search.root()))
     } else {
-        window.set_child(Some(&login));
+        window.set_child(Some(login.root()));
     }
 
     window.present();

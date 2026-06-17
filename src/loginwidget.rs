@@ -8,10 +8,12 @@ use gtk4::{
 
 use crate::traktclient::TraktClient;
 
-pub struct LoginWidget;
+pub struct LoginWidget {
+    root: Box,
+}
 
 impl LoginWidget {
-    pub fn new(trakt_client: Rc<RefCell<TraktClient>>) -> Box {
+    pub fn new(trakt_client: Rc<RefCell<TraktClient>>) -> Self {
         let vbox = Box::new(Orientation::Vertical, 8);
         let label = Label::new(Some("You're not logged in"));
         let btn = Button::with_label("login");
@@ -31,6 +33,11 @@ impl LoginWidget {
         vbox.append(&btn);
 
         vbox.add_css_class("login-widget");
-        vbox
+
+        Self { root: vbox }
+    }
+
+    pub fn root(&self) -> &Box {
+        &self.root
     }
 }
