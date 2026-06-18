@@ -16,7 +16,6 @@ pub struct SeasonsWidget {
     root: Paned,
     sidebar_list: ListBox,
     stack: Stack,
-    children: Vec<SeasonWidget>,
 }
 
 impl SeasonsWidget {
@@ -31,7 +30,7 @@ impl SeasonsWidget {
         let paned = Paned::new(Orientation::Horizontal);
         paned.set_start_child(Some(&scrolled_window));
         paned.set_end_child(Some(&stack));
-        paned.set_position(250);
+        paned.set_position(150);
 
         list_box.connect_row_activated(glib::clone!(
             #[weak]
@@ -45,7 +44,6 @@ impl SeasonsWidget {
             root: paned,
             sidebar_list: list_box,
             stack,
-            children: vec![],
         }
     }
 
