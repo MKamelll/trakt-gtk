@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use gtk4::{
     Align, Box, Button, Frame, Grid, Label, Notebook, Orientation, ScrolledWindow,
     prelude::{BoxExt, ButtonExt, FrameExt, GridExt, WidgetExt},
@@ -6,7 +8,7 @@ use gtk4::{
 use crate::{
     seasonswidget::SeasonsWidget,
     showinfoWidget::ShowInfoWidget,
-    traktclient::{Season, Show},
+    traktclient::{Episode, Season, Show},
 };
 
 #[derive(Clone)]
@@ -41,9 +43,14 @@ impl ShowDetailsWidget {
         self.back_btn.connect_clicked(move |_| f());
     }
 
-    pub fn update(&self, show: &Show, seasons: &Vec<Season>) {
+    pub fn update(
+        &self,
+        show: &Show,
+        seasons: &Vec<Season>,
+        episodes: &HashMap<i64, Vec<Episode>>,
+    ) {
         self.info_widget.update(show);
-        self.seasons_widget.update(seasons);
+        self.seasons_widget.update(seasons, episodes);
     }
 
     pub fn root(&self) -> &Notebook {

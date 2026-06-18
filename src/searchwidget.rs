@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc, vec};
 
 use gtk4::{
     Align, Box, Button, CenterBox, Frame, Grid, Label, ListBox, ListBoxRow, Orientation, Overlay,
@@ -12,7 +12,7 @@ use crate::{
     searchresultwidget::SearchResultWidget,
     showdetailswidget::ShowDetailsWidget,
     showinfoWidget::ShowInfoWidget,
-    traktclient::{SearchResult, Season, Show, TraktClient},
+    traktclient::{Episode, SearchResult, Season, Show, TraktClient},
 };
 
 pub struct SearchWidget {
@@ -107,6 +107,8 @@ impl SearchWidget {
             stack,
             #[strong]
             show_widget,
+            #[weak]
+            spinner,
             move |_, row| {
                 let r3 = Rc::clone(&r2);
                 let t3 = Rc::clone(&t2);
@@ -117,11 +119,22 @@ impl SearchWidget {
                     row,
                     #[strong]
                     show_widget,
+                    #[weak]
+                    spinner,
                     async move {
+                        spinner.start();
+                        spinner.set_visible(true);
                         let show = &r3.borrow()[row.index() as usize].show;
                         let t = t3.borrow();
-                        let res = &t.get_show_seasons(show).await;
-                        show_widget.update(show, res);
+                        let seasons = &t.get_show_seasons(show).await;
+                        let mut episodes = HashMap::new();
+                        for season in seasons {
+                            let s_episodes = t.get_season_episodes(show, &season).await;
+                            episodes.insert(season.number, s_episodes);
+                        }
+                        show_widget.update(show, seasons, &episodes);
+                        spinner.stop();
+                        spinner.set_visible(false);
                         stack.set_visible_child_name("show");
                     }
                 ));

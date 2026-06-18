@@ -56,6 +56,18 @@ pub struct Season {
 }
 
 #[derive(serde::Deserialize, serde::Serialize, Clone, Debug)]
+pub struct Episode {
+    pub number: i64,
+    pub title: String,
+    pub ids: Ids,
+    pub overview: Option<String>,
+    pub first_aired: Option<chrono::DateTime<Utc>>,
+    pub rating: Option<f32>,
+    pub runtime: Option<i64>,
+    pub original_title: Option<String>,
+}
+
+#[derive(serde::Deserialize, serde::Serialize, Clone, Debug)]
 pub struct SearchResult {
     pub show: Show,
 }
@@ -288,6 +300,15 @@ impl TraktClient {
     pub async fn get_show_seasons(&self, show: &Show) -> Vec<Season> {
         self.get(
             &format!("/shows/{}/seasons", show.ids.trakt),
+            false,
+            vec![("extended", "full")],
+        )
+        .await
+    }
+
+    pub async fn get_season_episodes(&self, show: &Show, season: &Season) -> Vec<Episode> {
+        self.get(
+            &format!("/shows/{}/seasons/{}", show.ids.trakt, season.ids.trakt),
             false,
             vec![("extended", "full")],
         )
