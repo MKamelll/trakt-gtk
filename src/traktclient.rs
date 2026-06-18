@@ -308,7 +308,7 @@ impl TraktClient {
 
     pub async fn get_season_episodes(&self, show: &Show, season: &Season) -> Vec<Episode> {
         self.get(
-            &format!("/shows/{}/seasons/{}", show.ids.trakt, season.ids.trakt),
+            &format!("/shows/{}/seasons/{}", show.ids.trakt, season.number),
             false,
             vec![("extended", "full")],
         )

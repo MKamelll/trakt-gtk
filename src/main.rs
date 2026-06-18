@@ -15,6 +15,7 @@ mod loginwidget;
 mod searchresultwidget;
 mod searchwidget;
 mod seasonswidget;
+mod seasonwidget;
 mod showdetailswidget;
 mod showinfoWidget;
 mod traktclient;
