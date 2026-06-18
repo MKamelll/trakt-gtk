@@ -71,6 +71,16 @@ impl SeasonWidget {
 
             content.attach(&rating_label, 3, 1, 1, 1);
 
+            let first_aired = Label::new(Some(&format!(
+                "First Aired {}",
+                match &episode.first_aired {
+                    Some(d) => d.to_string(),
+                    None => "N/A".to_string(),
+                }
+            )));
+
+            content.attach(&first_aired, 3, 2, 1, 1);
+
             let row = ListBoxRow::new();
             row.set_child(Some(&expander));
             self.list.append(&row);
