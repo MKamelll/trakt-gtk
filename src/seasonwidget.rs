@@ -1,38 +1,65 @@
+use std::{cell::RefCell, rc::Rc};
+
 use gtk4::{
-    Align, Box, Expander, Grid, Label, ListBox, ListBoxRow, Orientation, PolicyType,
-    ScrolledWindow,
-    prelude::{BoxExt, GridExt, ListBoxRowExt, WidgetExt},
+    Align, Box, Button, Expander, Grid, Label, ListBox, ListBoxRow, Orientation, PolicyType,
+    ScrolledWindow, ToggleButton,
+    glib::object::ObjectExt,
+    prelude::{BoxExt, ButtonExt, GridExt, ListBoxRowExt, ToggleButtonExt, WidgetExt},
 };
 
 use crate::traktclient::{Episode, Season};
 
 #[derive(Clone)]
 pub struct SeasonWidget {
-    root: ScrolledWindow,
+    root: Box,
+    scroll: ScrolledWindow,
     list: ListBox,
 }
 
 impl SeasonWidget {
     pub fn new() -> Self {
+        let vbox = Box::new(Orientation::Vertical, 4);
         let list = ListBox::new();
-        let scrolled_window = ScrolledWindow::new();
-        scrolled_window.set_hexpand(true);
-        scrolled_window.set_vexpand(true);
-        scrolled_window.set_hscrollbar_policy(PolicyType::Never);
-        scrolled_window.set_child(Some(&list));
+        let scroll = ScrolledWindow::new();
+        scroll.set_hexpand(true);
+        scroll.set_vexpand(true);
+        scroll.set_hscrollbar_policy(PolicyType::Never);
+        scroll.set_child(Some(&list));
+        vbox.append(&scroll);
 
         Self {
-            root: scrolled_window,
+            root: vbox,
+            scroll,
             list,
         }
     }
 
     pub fn update(&self, episodes: &Vec<Episode>) {
         for episode in episodes {
-            let expander = Expander::new(Some(&format!("{} - {}", episode.number, episode.title)));
-            expander.add_css_class("season-expander-widget");
+            let header = Box::new(Orientation::Horizontal, 0);
+            header.add_css_class("season-widget-expander-header");
+
+            let title = Label::new(Some(&format!("{} - {}", episode.number, episode.title)));
+            title.set_hexpand(true);
+            title.set_wrap(true);
+            title.set_halign(Align::Start);
+
+            let watched_btn = ToggleButton::new();
+            watched_btn.set_icon_name("checkmark-symbolic");
+            watched_btn.add_css_class("watched-toggle");
+
+            watched_btn.connect_clicked(|btn| {
+                btn.stop_signal_emission_by_name("clicked");
+            });
+
+            header.append(&title);
+            header.append(&watched_btn);
+
+            let expander = Expander::new(None);
+            expander.set_label_widget(Some(&header));
+
             let content = Grid::new();
-            content.add_css_class("season-expander-content-widget");
+            content.add_css_class("season-widget-expander-content");
             content.set_hexpand(true);
             content.set_column_spacing(4);
             content.set_row_spacing(4);
@@ -87,7 +114,7 @@ impl SeasonWidget {
         }
     }
 
-    pub fn root(&self) -> &ScrolledWindow {
+    pub fn root(&self) -> &Box {
         &self.root
     }
 }

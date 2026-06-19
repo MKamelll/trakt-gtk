@@ -28,10 +28,19 @@
     padding: 8px;
 }
 
-.season-expander-widget {
+.season-widget-expander-header {
     padding: 8px;
 }
 
-.season-expander-content-widget {
+.season-widget-expander-content {
     padding: 8px;
+}
+
+.watched-toggle {
+    opacity: 0.3;
+}
+
+.watched-toggle:checked {
+    opacity: 1.0;
+    background: green;
 }
