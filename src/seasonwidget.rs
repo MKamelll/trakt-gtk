@@ -4,6 +4,7 @@ use gtk4::{
     Align, Box, Button, Expander, Grid, Label, ListBox, ListBoxRow, Orientation, PolicyType,
     ScrolledWindow, ToggleButton,
     glib::object::ObjectExt,
+    pango::EllipsizeMode,
     prelude::{BoxExt, ButtonExt, GridExt, ListBoxRowExt, ToggleButtonExt, WidgetExt},
 };
 
@@ -41,7 +42,7 @@ impl SeasonWidget {
 
             let title = Label::new(Some(&format!("{} - {}", episode.number, episode.title)));
             title.set_hexpand(true);
-            title.set_wrap(true);
+            title.set_ellipsize(EllipsizeMode::End);
             title.set_halign(Align::Start);
 
             let watched_btn = ToggleButton::new();
